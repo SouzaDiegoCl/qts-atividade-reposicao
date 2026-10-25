@@ -30,6 +30,13 @@ def obter_banco():
             conteudo TEXT NOT NULL
         )
     """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS campanhas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            titulo TEXT NOT NULL,
+            meta TEXT NOT NULL
+        )
+    """)
     # Inserção de dados iniciais de teste
     cursor.execute("""
         INSERT INTO usuarios (nome, email, senha, is_admin)
@@ -52,6 +59,18 @@ class RequisicaoLogin(BaseModel):
 class RequisicaoComentario(BaseModel):
     autor: str
     conteudo: str
+
+
+# ==============================================================================
+# ENDPOINTS Da atividade
+# ==============================================================================
+
+@app.get("/seguro/campanhas/buscar")
+def buscar_campanhas_seguro(termo: str):
+    cursor = db.cursor()
+    query = "SELECT id, titulo, meta FROM campanhas WHERE titulo LIKE ?"
+    cursor.execute(query, (f"%{termo}%",))
+    return cursor.fetchall()
 
 
 # ==============================================================================
@@ -102,7 +121,6 @@ def comentar_vulneravel(dados: RequisicaoComentario):
         "conteudo": dados.conteudo,
         "aviso": "Comentario registrado sem higienizacao"
     }
-
 
 # ==============================================================================
 # ENDPOINTS SEGUROS (REFATORADOS EM CONFORMIDADE COM A OWASP)

@@ -9,6 +9,20 @@ from main import app
 cliente = TestClient(app)
 
 
+
+# ==============================================================================
+# ENDPOINTS Da atividade
+# ==============================================================================
+
+@pytest.mark.security
+def test_deve_rejeitar_extracao_union_select():
+    payload = "%' UNION SELECT id, email, senha FROM usuarios --"
+    resposta = cliente.get(f"/seguro/campanhas/buscar?termo={payload}")
+    assert resposta.status_code == 200
+    # Nenhum dado de senha pode ter sido retornado
+    for item in resposta.json():
+        assert "segredo_admin_123" not in str(item)
+
 # ==============================================================================
 # AUDITORIA OFENSIVA: PROVANDO AS VULNERABILIDADES NO ENDPOINT INSEGURO
 # ==============================================================================
